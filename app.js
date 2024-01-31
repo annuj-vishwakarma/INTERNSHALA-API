@@ -2,9 +2,16 @@ require("dotenv").config({path:"./.env"})
 const express = require("express")
 const app = express();
 
+//db connection
+
+require("./models/database").connectDatabase();
+
+
+
 //logger 
 const logger =require("morgan");
 const ErrorHandler = require("./utils/ErrorHandler");
+const { generatedErrors } = require("./controller/middleware/errors");
 app.use(logger("tiny"))
 
 //routes
