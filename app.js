@@ -6,7 +6,7 @@ const express_session = require('express-session')
 const dotenv = require('dotenv');
 dotenv.config({ path: './.env' });
 
-// Database Connection
+// Database 
 connectDb.databaseConnect();
 
 //Express FileUpload
