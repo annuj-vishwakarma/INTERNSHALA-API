@@ -1,29 +1,53 @@
-require("dotenv").config({path:"./.env"})
-const express = require("express")
+const express = require('express');
 const app = express();
+const connectDb = require('./models/database');
+const loggger = require('morgan');
+const express_session = require('express-session')
+const dotenv = require('dotenv');
+dotenv.config({ path: './.env' });
 
-//db connection
+// Database Connection
+connectDb.databaseConnect();
 
-require("./models/database").connectDatabase();
+//Express FileUpload
+const fileupload = require("express-fileupload")
+app.use(fileupload())
 
+//logger
+app.use(loggger('tiny'));
 
+//bodyParser
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 
-//logger 
-const logger =require("morgan");
-const ErrorHandler = require("./utils/ErrorHandler");
-const { generatedErrors } = require("./controller/middleware/errors");
-app.use(logger("tiny"))
+// Express-Session , Cookie-parser
+const cookieparser = require('cookie-parser');
+const session = require('express-session');
+app.use(
+	session({
+		resave: true,
+		saveUninitialized: true,
+		secret: process.env.EXPRESS_SESSION_SECRET,
+	})
+);
+app.use(cookieparser());
 
-//routes
-app.use("/", require("./routes/indexRoutes"))
+//Routes
+app.use('/user', require('./routes/indexRoutes'));
+app.use('/resume', require('./routes/resumeRoutes.js'));
+app.use('/employer', require('./routes/employerRoutes.js'));
 
-
-//error handling
-app.all("*",(req,res,next)=>{
-    next(new ErrorHandler(`requested url not found ${req.url}`,404))
-})
-
+//Error Handling
+const ErrorHandler = require('./utils/ErrorHandlers');
+const { generatedErrors } = require('./middlewares/error');
+app.all('*', (req, res, next) => {
+	next(new ErrorHandler(`Requested URL NOT FOUND ${req.url}`, 404));
+});
 app.use(generatedErrors);
 
+app.listen(
+	process.env.PORT,
+	console.log(`Server is RunninG on Port ${process.env.PORT}`)
+);
 
-app.listen(process.env.PORT, console.log(`server running on port ${process.env.PORT}`))
+module.exports = app;

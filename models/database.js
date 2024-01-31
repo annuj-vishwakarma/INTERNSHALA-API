@@ -7,6 +7,6 @@ try{
     console.log('Database Connection Established!');
 
 }catch(error){
-console.log("error.message")
+console.log(error.message)
 }
 }
